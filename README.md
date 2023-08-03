@@ -3,7 +3,7 @@ Notes
 -Codes in this repository are WIP codes, they contain printfs for debugging purposes etc.<br />
 -Some issues related to copyrights need to be solved.<br />
 -Codes by JS are beginner's work. Criticism is welcome.<br />
--For JH7100 specifically this contains now clk drivers and reset.<br />
+-For JH7110 specifically this contains now clk drivers and reset.<br />
 -Also contains some drivers for JH7100, they need further developing.<br />
 -Does not boot.<br />
 
