@@ -4,6 +4,7 @@ cddl/dev/dtrace/riscv/dtrace_subr.c			optional dtrace compile-with "${DTRACE_C}"
 cddl/dev/dtrace/riscv/instr_size.c			optional dtrace compile-with "${DTRACE_C}"
 cddl/dev/fbt/riscv/fbt_isa.c				optional dtrace_fbt | dtraceall compile-with "${FBT_C}"
 crypto/des/des_enc.c		optional	netsmb
+dev/mmc/host/dwmmc_starfive.c   optional	dwmmc fdt
 dev/ofw/ofw_cpu.c		optional	fdt
 dev/ofw/ofw_pcib.c		optional 	pci fdt
 dev/pci/pci_dw.c		optional	pci fdt
@@ -12,6 +13,9 @@ dev/pci/pci_host_generic.c	optional	pci
 dev/pci/pci_host_generic_fdt.c	optional	pci fdt
 dev/uart/uart_cpu_fdt.c		optional	uart fdt
 dev/uart/uart_dev_lowrisc.c	optional	uart_lowrisc
+dev/usb/controller/cdns3.c      optional        xhci fdt cdns
+dev/usb/controller/generic_xhci.c		optional xhci
+dev/usb/controller/generic_xhci_fdt.c		optional xhci fdt
 dev/xilinx/axi_quad_spi.c	optional	xilinx_spi
 dev/xilinx/axidma.c		optional	axidma xdma
 dev/xilinx/if_xae.c		optional	xae
@@ -23,6 +27,12 @@ kern/subr_dummy_vdso_tc.c	standard
 kern/subr_intr.c		standard
 kern/subr_physmem.c		standard
 libkern/bcopy.c			standard
+#libkern/ffs.c			standard
+#libkern/ffsl.c			standard
+#libkern/ffsll.c		standard
+#libkern/fls.c			standard
+#libkern/flsl.c			standard
+#libkern/flsll.c		standard
 libkern/memcmp.c		standard
 libkern/memset.c		standard
 libkern/strcmp.c		standard
@@ -69,6 +79,14 @@ riscv/riscv/uio_machdep.c	standard
 riscv/riscv/uma_machdep.c	standard
 riscv/riscv/unwind.c		optional	ddb | kdtrace_hooks | stack
 riscv/riscv/vm_machdep.c	standard
+
+riscv/starfive/starfive_if_dwc.c        optional       fdt dwc_starfive
+riscv/starfive/clk/jh7110_clk.c	        standard
+riscv/starfive/clk/jh7110_clkgen.c	standard
+riscv/starfive/clk/jh7110_clk_pll.c	standard
+#riscv/starfive/jh7110_gpio.c           standard
+riscv/starfive/jh7110_reset.c	        standard
+
 
 # Zstd
 contrib/zstd/lib/freebsd/zstd_kfreebsd.c		optional zstdio compile-with ${ZSTD_C}
