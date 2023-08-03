@@ -234,7 +234,7 @@ static struct jh7110_pll_def pll_out_clks[] = {
 };
 
 /* SYS fixed pll clocks */
-static const struct clk_fixed_def sys_pll_clks[] = {
+static struct clk_fixed_def sys_pll_clks[] = {
 
 	JH7110_PLL(JH7110_GMACUSB_ROOT, "gmacusb_root", gmacusb_root_p),
 	JH7110_PLL(JH7110_PCLK2_MUX_FUNC_PCLK, "u2_pclk_mux_func_pclk",
@@ -265,7 +265,7 @@ static const struct jh7110_clk_def aon_clks[] = {
 };
 
 /* external SYS & AON clocks */
-static const struct clk_link_def ext_clks[] = {
+static struct clk_link_def ext_clks[] = {
 	JH7110_LINK(JH7110_CLK_END + 12, "gmac0_rmii_refin"),
 };
 

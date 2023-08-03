@@ -34,8 +34,8 @@ __FBSDID("$FreeBSD$");
 #include <sys/systm.h>
 #include <sys/bus.h>
 
-#include <riscv/starfive/jh7110_clk_pll.h>
-#include <riscv/starfive/jh7110_clk.h>
+#include <riscv/starfive/clk/jh7110_clk_pll.h>
+#include <riscv/starfive/clk/jh7110_clk.h>
 #include <dev/extres/clk/clk.h>
 #include <dev/extres/syscon/syscon.h>
 

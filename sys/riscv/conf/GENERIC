@@ -72,16 +72,16 @@ options 	MAC			# TrustedBSD MAC Framework
 options 	KDTRACE_FRAME		# Ensure frames are compiled in
 options 	KDTRACE_HOOKS		# Kernel DTrace hooks
 options 	DDB_CTF			# Kernel ELF linker loads CTF data
-options 	FPE			# Floating-point extension support
+# options 	FPE			# Floating-point extension support
 options 	RACCT			# Resource accounting framework
 options 	RACCT_DEFAULT_TO_DISABLED # Set kern.racct.enable=0 by default
 options 	RCTL			# Resource limits
 options 	SMP
 
-options         KTR
-options         KTR_COMPILE=(KTR_BUF|KTR_VFS|KTR_SCHED|KTR_BUSDMA)
-options         KTR_MASK=(KTR_BUSDMA)
-options         KTR_VERBOSE=0
+#options         KTR
+#options         KTR_COMPILE=(KTR_BUF|KTR_VFS|KTR_SCHED|KTR_BUSDMA)
+#options         KTR_MASK=(KTR_BUSDMA)
+#options         KTR_VERBOSE=0
 
 # RISC-V SBI console
 device		rcons
@@ -108,6 +108,9 @@ device		virtio_pci		# VirtIO PCI device
 device		vtnet			# VirtIO Ethernet device
 device		virtio_blk		# VirtIO Block device
 device		virtio_mmio		# VirtIO MMIO bus
+
+# ATA/SCSI peripherals
+device		pass			# Passthrough device (direct ATA/SCSI access)
 
 # NVM Express (NVMe) support
 device		nvme		# base NVMe driver
@@ -244,7 +247,7 @@ include		"../sifive/std.sifive"
 #device	        jh7110_gpio
 include		"../starfive/std.starfive"
 
-options         KTR
-options         KTR_COMPILE=KTR_BUSDMA
-options         KTR_MASK=KTR_BUSDMA
-options         KTR_VERBOSE=0
+#options         KTR
+#options         KTR_COMPILE=KTR_BUSDMA
+#options         KTR_MASK=KTR_BUSDMA
+#options         KTR_VERBOSE=0
