@@ -1,45 +1,25 @@
-FreeBSD Source:
----------------
-This is the top level of the FreeBSD source directory.
+Notes
 
-FreeBSD is an operating system used to power modern servers, desktops, and embedded platforms.
-A large community has continually developed it for more than thirty years.
-Its advanced networking, security, and storage features have made FreeBSD the platform of choice for many of the busiest web sites and most pervasive embedded networking and storage devices.
+-Codes in this repository are WIP codes, they contain printfs for debugging purposes etc.
+-Some issues related to copyrights need to be solved.
+-Codes by JS are beginner's work. Criticism is welcome.
+-For JH7100 specifically this contains now clk drivers and reset.
+-Also contains some drivers for JH7100, they need further developing.
+-Does not boot.
 
-For copyright information, please see [the file COPYRIGHT](COPYRIGHT) in this directory.
-Additional copyright information also exists for some sources in this tree - please see the specific source directories for more information.
+How to test
 
-The Makefile in this directory supports a number of targets for building components (or all) of the FreeBSD source tree.
-See build(7), config(8), [FreeBSD handbook on building userland](https://docs.freebsd.org/en/books/handbook/cutting-edge/#makeworld), and [Handbook for kernels](https://docs.freebsd.org/en/books/handbook/kernelconfig/) for more information, including setting make(1) variables.
+-Download FreeBSD's generic SD image dated 2023-07-27 and copy it to your microSD card
+https://download.freebsd.org/snapshots/riscv/riscv64/ISO-IMAGES/14.0/FreeBSD-14.0-CURRENT-riscv-riscv64-GENERICSD-20230727-474708c334a7-264358.img.xz
+-Clone this repository and build the kernel
+-Copy the kernel to SD image's UFS partition's file: /boot/kernel/kernel
+-Copy a device tree file jh7110-visionfive-v2.dtb (placed to the root of this repository) to SD image's EFI partition's file: /dtb/jh7110-visionfive-v2.dtb
 
-For information on the CPU architectures and platforms supported by FreeBSD, see the [FreeBSD
-website's Platforms page](https://www.freebsd.org/platforms/).
+-One of booting methods is described here (tested without updating firmware):
+1) QSPI boot mode (board's physical boot switches must point to the right)
+2) after switching power on, stop autoboot by pressing any key when a counter appears
+3) then type commands
+load mmc 1:1 0x48000000 dtb/jh7110-visionfive-v2.dtb
+load mmc 1:1 0x44000000 EFI/BOOT/bootriscv64.efi
+bootefi 0x44000000 0x48000000
 
-Source Roadmap:
----------------
-| Directory | Description |
-| --------- | ----------- |
-| bin | System/user commands. |
-| cddl | Various commands and libraries under the Common Development and Distribution License. |
-| contrib | Packages contributed by 3rd parties. |
-| crypto | Cryptography stuff (see [crypto/README](crypto/README)). |
-| etc | Template files for /etc. |
-| gnu | Commands and libraries under the GNU General Public License (GPL) or Lesser General Public License (LGPL). Please see [gnu/COPYING](gnu/COPYING) and [gnu/COPYING.LIB](gnu/COPYING.LIB) for more information. |
-| include | System include files. |
-| kerberos5 | Kerberos5 (Heimdal) package. |
-| lib | System libraries. |
-| libexec | System daemons. |
-| release | Release building Makefile & associated tools. |
-| rescue | Build system for statically linked /rescue utilities. |
-| sbin | System commands. |
-| secure | Cryptographic libraries and commands. |
-| share | Shared resources. |
-| stand | Boot loader sources. |
-| sys | Kernel sources (see [sys/README.md](sys/README.md)). |
-| targets | Support for experimental `DIRDEPS_BUILD` |
-| tests | Regression tests which can be run by Kyua.  See [tests/README](tests/README) for additional information. |
-| tools | Utilities for regression testing and miscellaneous tasks. |
-| usr.bin | User commands. |
-| usr.sbin | System administration commands. |
-
-For information on synchronizing your source tree with one or more of the FreeBSD Project's development branches, please see [FreeBSD Handbook](https://docs.freebsd.org/en/books/handbook/cutting-edge/#current-stable).
