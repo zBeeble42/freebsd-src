@@ -55,9 +55,7 @@ MAN=	aac.4 \
 	at45d.4 \
 	ata.4 \
 	ath.4 \
-	ath_ahb.4 \
 	ath_hal.4 \
-	ath_pci.4 \
 	atkbd.4 \
 	atkbdc.4 \
 	atp.4 \
@@ -624,7 +622,6 @@ MLINKS+=altera_atse.4 atse.4
 MLINKS+=altera_sdcard.4 altera_sdcardc.4
 MLINKS+=altq.4 ALTQ.4
 MLINKS+=ath.4 if_ath.4
-MLINKS+=ath_pci.4 if_ath_pci.4
 MLINKS+=aue.4 if_aue.4
 MLINKS+=axe.4 if_axe.4
 MLINKS+=bce.4 if_bce.4
