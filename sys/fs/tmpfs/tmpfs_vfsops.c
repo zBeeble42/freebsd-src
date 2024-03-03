@@ -46,9 +46,6 @@
 #include "opt_ddb.h"
 #include "opt_tmpfs.h"
 
-#include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
-
 #include <sys/param.h>
 #include <sys/systm.h>
 #include <sys/dirent.h>
@@ -93,7 +90,7 @@ static int	tmpfs_statfs(struct mount *, struct statfs *);
 
 static const char *tmpfs_opts[] = {
 	"from", "easize", "size", "maxfilesize", "inodes", "uid", "gid", "mode",
-	"export", "union", "nonc", "nomtime", "nosymfollow", NULL
+	"export", "union", "nonc", "nomtime", "nosymfollow", "pgread", NULL
 };
 
 static const char *tmpfs_updateopts[] = {

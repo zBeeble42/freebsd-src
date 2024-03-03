@@ -1,5 +1,3 @@
-#	@(#)Makefile	8.1 (Berkeley) 6/18/93
-# $FreeBSD$
 
 .include <src.opts.mk>
 
@@ -58,6 +56,7 @@ MAN=	aac.4 \
 	ath_hal.4 \
 	atkbd.4 \
 	atkbdc.4 \
+	${_atopcase.4} \
 	atp.4 \
 	${_atf_test_case.4} \
 	${_atrtc.4} \
@@ -171,7 +170,6 @@ MAN=	aac.4 \
 	genetlink.4 \
 	geom.4 \
 	geom_linux_lvm.4 \
-	geom_map.4 \
 	geom_uzip.4 \
 	gif.4 \
 	${_gve.4} \
@@ -435,6 +433,7 @@ MAN=	aac.4 \
 	pcm.4 \
 	${_pf.4} \
 	${_pflog.4} \
+	${_pflow.4} \
 	${_pfsync.4} \
 	pim.4 \
 	pms.4 \
@@ -471,7 +470,6 @@ MAN=	aac.4 \
 	rtnetlink.4 \
 	rtsx.4 \
 	rtw88.4 \
-	rtw88fw.4 \
 	rtwn.4 \
 	rtwnfw.4 \
 	rtwn_pci.4 \
@@ -571,6 +569,7 @@ MAN=	aac.4 \
 	virtio_balloon.4 \
 	virtio_blk.4 \
 	virtio_console.4 \
+	virtio_gpu.4 \
 	virtio_random.4 \
 	virtio_scsi.4 \
 	${_vmci.4} \
@@ -691,6 +690,7 @@ MLINKS+=ipfirewall.4 ipaccounting.4 \
 MLINKS+=ipheth.4 if_ipheth.4
 MLINKS+=ipw.4 if_ipw.4
 MLINKS+=iwi.4 if_iwi.4
+MLINKS+=iwlwifi.4 if_iwlwifi.4
 MLINKS+=iwm.4 if_iwm.4
 MLINKS+=iwn.4 if_iwn.4
 MLINKS+=ixgbe.4 ix.4
@@ -794,6 +794,7 @@ _amdsmb.4=	amdsmb.4
 _amdsmn.4=	amdsmn.4
 _amdtemp.4=	amdtemp.4
 _asmc.4=	asmc.4
+_atopcase.4=	atopcase.4
 _bxe.4=		bxe.4
 _bytgpio.4=	bytgpio.4
 _chvgpio.4=	chvgpio.4
@@ -969,6 +970,7 @@ _atf_test_case.4=	atf-test-case.4
 .if ${MK_PF} != "no"
 _pf.4=		pf.4
 _pflog.4=	pflog.4
+_pflow.4=	pflow.4
 _pfsync.4=	pfsync.4
 .endif
 

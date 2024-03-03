@@ -35,9 +35,6 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	@(#)union_vnops.c	8.32 (Berkeley) 6/23/95
- * $FreeBSD$
- *
  */
 
 #include <sys/param.h>
@@ -604,7 +601,7 @@ unionfs_close(struct vop_close_args *ap)
 	struct vnode   *vp;
 	struct vnode   *ovp;
 	int		error;
-	enum unionfs_lkupgrade lkstatus;;
+	enum unionfs_lkupgrade lkstatus;
 
 	UNIONFS_INTERNAL_DEBUG("unionfs_close: enter\n");
 
@@ -767,7 +764,7 @@ unionfs_access(struct vop_access_args *ap)
 
 	if (lvp != NULLVP) {
 		if (accmode & VWRITE) {
-			if (ump->um_uppervp->v_mount->mnt_flag & MNT_RDONLY) {
+			if ((ump->um_uppermp->mnt_flag & MNT_RDONLY) != 0) {
 				switch (ap->a_vp->v_type) {
 				case VREG:
 				case VDIR:
@@ -838,7 +835,7 @@ unionfs_getattr(struct vop_getattr_args *ap)
 
 	error = VOP_GETATTR(lvp, ap->a_vap, ap->a_cred);
 
-	if (error == 0 && !(ump->um_uppervp->v_mount->mnt_flag & MNT_RDONLY)) {
+	if (error == 0 && (ump->um_uppermp->mnt_flag & MNT_RDONLY) == 0) {
 		/* correct the attr toward shadow file/dir. */
 		if (ap->a_vp->v_type == VREG || ap->a_vp->v_type == VDIR) {
 			unionfs_create_uppervattr_core(ump, ap->a_vap, &va, td);
@@ -1001,13 +998,21 @@ unionfs_fsync(struct vop_fsync_args *ap)
 	struct unionfs_node *unp;
 	struct unionfs_node_status *unsp;
 	struct vnode *ovp;
+	enum unionfs_lkupgrade lkstatus;
 
 	KASSERT_UNIONFS_VNODE(ap->a_vp);
 
 	unp = VTOUNIONFS(ap->a_vp);
+	lkstatus = unionfs_upgrade_lock(ap->a_vp);
+	if (lkstatus == UNIONFS_LKUPGRADE_DOOMED) {
+		unionfs_downgrade_lock(ap->a_vp, lkstatus);
+		return (ENOENT);
+	}
 	unionfs_get_node_status(unp, ap->a_td, &unsp);
 	ovp = (unsp->uns_upper_opencnt ? unp->un_uppervp : unp->un_lowervp);
 	unionfs_tryrem_node_status(unp, unsp);
+
+	unionfs_downgrade_lock(ap->a_vp, lkstatus);
 
 	if (ovp == NULLVP)
 		return (EBADF);

@@ -57,9 +57,6 @@
 
 #include "opt_ddb.h"
 
-#include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
-
 #include <sys/param.h>
 #include <sys/systm.h>
 #include <sys/kernel.h>
@@ -811,25 +808,11 @@ rman_make_alignment_flags(uint32_t size)
 	return(RF_ALIGNMENT_LOG2(i));
 }
 
-void
-rman_set_start(struct resource *r, rman_res_t start)
-{
-
-	r->__r_i->r_start = start;
-}
-
 rman_res_t
 rman_get_start(struct resource *r)
 {
 
 	return (r->__r_i->r_start);
-}
-
-void
-rman_set_end(struct resource *r, rman_res_t end)
-{
-
-	r->__r_i->r_end = end;
 }
 
 rman_res_t

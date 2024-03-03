@@ -27,8 +27,6 @@
  * SUCH DAMAGE.
  *
  *
- * $FreeBSD$
- *
  */
 
 #ifndef __PCI_HOST_GENERIC_H_
@@ -65,6 +63,7 @@ struct pcie_range {
 #define	FLAG_TYPE_IO		0x1
 #define	FLAG_TYPE_MEM		0x2
 #define	FLAG_TYPE_PMEM		0x3
+	struct resource *res;
 };
 
 struct generic_pcie_core_softc {
@@ -76,7 +75,6 @@ struct generic_pcie_core_softc {
 	struct rman		mem_rman;
 	struct rman		io_rman;
 	struct resource		*res;
-	struct resource		*res1;
 	int			bus_start;
 	int			bus_end;
 	int			ecam;

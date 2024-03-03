@@ -26,7 +26,6 @@
  * SUCH DAMAGE.
  */
 
-/* $FreeBSD$ */
 #include "if_em.h"
 #include <sys/sbuf.h>
 #include <machine/_inttypes.h>
@@ -37,8 +36,8 @@
 /*********************************************************************
  *  Driver version:
  *********************************************************************/
-char em_driver_version[] = "7.7.8-fbsd";
-char igb_driver_version[] = "2.5.19-fbsd";
+static const char em_driver_version[] = "7.7.8-fbsd";
+static const char igb_driver_version[] = "2.5.19-fbsd";
 
 /*********************************************************************
  *  PCI Device ID Table
@@ -50,7 +49,7 @@ char igb_driver_version[] = "2.5.19-fbsd";
  *  { Vendor ID, Device ID, SubVendor ID, SubDevice ID, String Index }
  *********************************************************************/
 
-static pci_vendor_info_t em_vendor_info_array[] =
+static const pci_vendor_info_t em_vendor_info_array[] =
 {
 	/* Intel(R) - lem-class legacy devices */
 	PVID(0x8086, E1000_DEV_ID_82540EM, "Intel(R) Legacy PRO/1000 MT 82540EM"),
@@ -215,7 +214,7 @@ static pci_vendor_info_t em_vendor_info_array[] =
 	PVID_END
 };
 
-static pci_vendor_info_t igb_vendor_info_array[] =
+static const pci_vendor_info_t igb_vendor_info_array[] =
 {
 	/* Intel(R) - igb-class devices */
 	PVID(0x8086, E1000_DEV_ID_82575EB_COPPER, "Intel(R) PRO/1000 82575EB (Copper)"),
@@ -543,13 +542,6 @@ static int em_debug_sbp = false;
 SYSCTL_INT(_hw_em, OID_AUTO, sbp, CTLFLAG_RDTUN, &em_debug_sbp, 0,
     "Show bad packets in promiscuous mode");
 
-/* How many packets rxeof tries to clean at a time */
-static int em_rx_process_limit = 100;
-SYSCTL_INT(_hw_em, OID_AUTO, rx_process_limit, CTLFLAG_RDTUN,
-    &em_rx_process_limit, 0,
-    "Maximum number of received packets to process "
-    "at a time, -1 means unlimited");
-
 /* Energy efficient ethernet - default to OFF */
 static int eee_setting = 1;
 SYSCTL_INT(_hw_em, OID_AUTO, eee_setting, CTLFLAG_RDTUN, &eee_setting, 0,
@@ -561,8 +553,6 @@ SYSCTL_INT(_hw_em, OID_AUTO, eee_setting, CTLFLAG_RDTUN, &eee_setting, 0,
 static int em_max_interrupt_rate = 8000;
 SYSCTL_INT(_hw_em, OID_AUTO, max_interrupt_rate, CTLFLAG_RDTUN,
     &em_max_interrupt_rate, 0, "Maximum interrupts per second");
-
-
 
 /* Global used in WOL setup with multiport cards */
 static int global_quad_port_a = 0;
@@ -833,8 +823,6 @@ em_if_attach_pre(if_ctx_t ctx)
 	sc->media = iflib_get_media(ctx);
 	hw = &sc->hw;
 
-	sc->tx_process_limit = scctx->isc_ntxd[0];
-
 	/* Determine hardware and mac info */
 	em_identify_hardware(ctx);
 
@@ -906,6 +894,9 @@ em_if_attach_pre(if_ctx_t ctx)
 		scctx->isc_tx_csum_flags = CSUM_TCP | CSUM_UDP | CSUM_IP_TSO |
 		    CSUM_IP6_TCP | CSUM_IP6_UDP;
 
+		/* Disable TSO on all em(4) until ring stalls can be debugged */
+		scctx->isc_capenable &= ~IFCAP_TSO;
+
 		/*
 		 * Disable TSO on SPT due to errata that downclocks DMA performance
 		 * i218-i219 Specification Update 1.5.4.5
@@ -937,6 +928,9 @@ em_if_attach_pre(if_ctx_t ctx)
 			scctx->isc_capabilities |= IFCAP_TSO6;
 		scctx->isc_tx_csum_flags = CSUM_TCP | CSUM_UDP | CSUM_IP_TSO |
 		    CSUM_IP6_TCP | CSUM_IP6_UDP;
+
+		/* Disable TSO on all lem(4) until ring stalls can be debugged */
+		scctx->isc_capenable &= ~IFCAP_TSO;
 
 		/* 82541ER doesn't do HW tagging */
 		if (hw->device_id == E1000_DEV_ID_82541ER ||
@@ -4378,7 +4372,7 @@ em_if_get_counter(if_ctx_t ctx, ift_counter cnt)
  * @ctx: iflib context
  * @event: event code to check
  *
- * Defaults to returning true for unknown events.
+ * Defaults to returning false for unknown events.
  *
  * @returns true if iflib needs to reinit the interface
  */
@@ -4387,9 +4381,8 @@ em_if_needs_restart(if_ctx_t ctx __unused, enum iflib_restart_event event)
 {
 	switch (event) {
 	case IFLIB_RESTART_VLAN_CONFIG:
-		return (false);
 	default:
-		return (true);
+		return (false);
 	}
 }
 

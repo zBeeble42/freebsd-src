@@ -1,4 +1,3 @@
-# $FreeBSD$
 #
 # Option file for FreeBSD /usr/src builds, at least the userland and boot loader
 # portions of the tree. These options generally chose what parts of the tree to
@@ -87,7 +86,6 @@ __DEFAULT_YES_OPTIONS = \
     CRYPT \
     CUSE \
     CXGBETOOL \
-    DIALOG \
     DICT \
     DMAGENT \
     DTRACE \
@@ -126,7 +124,6 @@ __DEFAULT_YES_OPTIONS = \
     LEGACY_CONSOLE \
     LLD \
     LLD_BOOTSTRAP \
-    LLD_IS_LD \
     LLVM_ASSERTIONS \
     LLVM_COV \
     LLVM_CXXFILT \
@@ -198,15 +195,18 @@ __DEFAULT_NO_OPTIONS = \
     BHYVE_SNAPSHOT \
     CLANG_EXTRAS \
     CLANG_FORMAT \
+    DIALOG \
     DETECT_TZ_CHANGES \
     DISK_IMAGE_TOOLS_BOOTSTRAP \
     DTRACE_ASAN \
     DTRACE_TESTS \
     EXPERIMENTAL \
     HESIOD \
+    LOADER_BIOS_TEXTONLY \
     LOADER_VERBOSE \
     LOADER_VERIEXEC_PASS_MANIFEST \
     LLVM_BINUTILS \
+    LLVM_FULL_DEBUGINFO \
     MALLOC_PRODUCTION \
     OFED_EXTRA \
     OPENLDAP \
@@ -228,6 +228,12 @@ __DEFAULT_DEPENDENT_OPTIONS= \
 	LOADER_EFI_SECUREBOOT/LOADER_VERIEXEC \
 	LOADER_VERIEXEC_VECTX/LOADER_VERIEXEC \
 	VERIEXEC/BEARSSL \
+
+__SINGLE_OPTIONS = \
+	LIBC_MALLOC
+
+__LIBC_MALLOC_OPTIONS=	jemalloc
+__LIBC_MALLOC_DEFAULT=	jemalloc
 
 # MK_*_SUPPORT options which default to "yes" unless their corresponding
 # MK_* variable is set to "no".
@@ -307,6 +313,10 @@ BROKEN_OPTIONS+=LIB32
 .if ${__T:Mpowerpc*} || ${__T} == "i386"
 BROKEN_OPTIONS+=EFI
 .endif
+# Bad coupling for libsecure stuff with bearssl and efi, so broken on EFI
+.if ${__T:Mpowerpc*}
+BROKEN_OPTIONS+=BEARSSL		# bearssl brings in secure efi stuff xxx
+.endif
 # OFW is only for powerpc, exclude others
 .if ${__T:Mpowerpc*} == ""
 BROKEN_OPTIONS+=LOADER_OFW
@@ -363,7 +373,7 @@ BROKEN_OPTIONS+= OFED
 .endif
 
 # MK_host_egacy is set by local.sys.mk so is valid here
-.if ${MACHINE} == "host" && ${MK_host_egacy} == "yes"
+.if ${MACHINE:Nhost*} == "" && ${MK_host_egacy} == "yes"
 # we cannot expect tests to work
 BROKEN_OPTIONS+= TESTS
 .endif
@@ -397,10 +407,6 @@ MK_OPENSSL:=	no
 MK_OPENSSH:=	no
 MK_KERBEROS:=	no
 MK_KERBEROS_SUPPORT:=	no
-.endif
-
-.if ${MK_DIALOG} == "no"
-MK_BSDINSTALL:=	no
 .endif
 
 .if ${MK_DTRACE} == "no"

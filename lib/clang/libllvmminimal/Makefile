@@ -1,5 +1,5 @@
-# $FreeBSD$
 
+.include <bsd.init.mk>
 .include "../llvm.pre.mk"
 
 LIB=		llvmminimal
@@ -30,7 +30,6 @@ SRCS+=		Support/InitLLVM.cpp
 SRCS+=		Support/IntEqClasses.cpp
 SRCS+=		Support/JSON.cpp
 SRCS+=		Support/Locale.cpp
-SRCS+=		Support/LowLevelType.cpp
 SRCS+=		Support/MD5.cpp
 SRCS+=		Support/ManagedStatic.cpp
 SRCS+=		Support/MemAlloc.cpp
@@ -71,6 +70,7 @@ SRCS+=		Support/regerror.c
 SRCS+=		Support/regexec.c
 SRCS+=		Support/regfree.c
 SRCS+=		Support/regstrlcpy.c
+SRCS+=		Support/xxhash.cpp
 SRCS+=		TableGen/DetailedRecordsBackend.cpp
 SRCS+=		TableGen/Error.cpp
 SRCS+=		TableGen/JSONBackend.cpp

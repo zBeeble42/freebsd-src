@@ -26,8 +26,6 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $FreeBSD$
  */
 
 extern "C" {
@@ -190,7 +188,7 @@ TEST_P(BmapEof, eof)
 	const off_t filesize = 2 * m_maxbcachebuf;
 	const ino_t ino = 42;
 	mode_t mode = S_IFREG | 0644;
-	void *buf;
+	char *buf;
 	int fd;
 	int ngetattrs;
 
@@ -245,11 +243,12 @@ TEST_P(BmapEof, eof)
 		out.body.attr.attr.size = filesize / 2;
 	})));
 
-	buf = calloc(1, filesize);
+	buf = new char[filesize]();
 	fd = open(FULLPATH, O_RDWR);
 	ASSERT_LE(0, fd) << strerror(errno);
 	read(fd, buf, filesize);
 
+	delete[] buf;
 	leak(fd);
 }
 

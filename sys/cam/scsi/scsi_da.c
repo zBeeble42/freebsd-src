@@ -28,9 +28,6 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
-
 #include <sys/param.h>
 
 #ifdef _KERNEL
@@ -140,7 +137,7 @@ typedef enum {
 	"\013CAN_RC16"		\
 	"\014PROBED"		\
 	"\015DIRTY"		\
-	"\016ANNOUCNED"		\
+	"\016ANNOUNCED"		\
 	"\017CAN_ATA_DMA"	\
 	"\020CAN_ATA_LOG"	\
 	"\021CAN_ATA_IDLOG"	\
@@ -1400,6 +1397,22 @@ static struct da_quirk_entry da_quirk_table[] =
 	},
 	{
 		/*
+		 * Samsung 860 SSDs
+		 * 4k optimised & trim only works in 4k requests + 4k aligned
+		 */
+		{ T_DIRECT, SIP_MEDIA_FIXED, "ATA", "Samsung SSD 860*", "*" },
+		/*quirks*/DA_Q_4K
+	},
+	{
+		/*
+		 * Samsung 870 SSDs
+		 * 4k optimised & trim only works in 4k requests + 4k aligned
+		 */
+		{ T_DIRECT, SIP_MEDIA_FIXED, "ATA", "Samsung SSD 870*", "*" },
+		/*quirks*/DA_Q_4K
+	},
+	{
+		/*
 		 * Samsung 843T Series SSDs (MZ7WD*)
 		 * Samsung PM851 Series SSDs (MZ7TE*)
 		 * Samsung PM853T Series SSDs (MZ7GE*)
@@ -2353,11 +2366,11 @@ dasysctlinit(void *context, int pending)
 	SYSCTL_ADD_PROC(&softc->sysctl_ctx, SYSCTL_CHILDREN(softc->sysctl_tree),
 	    OID_AUTO, "rotating", CTLTYPE_INT | CTLFLAG_RD | CTLFLAG_MPSAFE,
 	    &softc->flags, (u_int)DA_FLAG_ROTATING, dabitsysctl, "I",
-	    "Rotating media *DEPRECATED* gone in FreeBSD 14");
+	    "Rotating media *DEPRECATED* gone in FreeBSD 15");
 	SYSCTL_ADD_PROC(&softc->sysctl_ctx, SYSCTL_CHILDREN(softc->sysctl_tree),
 	    OID_AUTO, "unmapped_io", CTLTYPE_INT | CTLFLAG_RD | CTLFLAG_MPSAFE,
 	    &softc->flags, (u_int)DA_FLAG_UNMAPPEDIO, dabitsysctl, "I",
-	    "Unmapped I/O support *DEPRECATED* gone in FreeBSD 14");
+	    "Unmapped I/O support *DEPRECATED* gone in FreeBSD 15");
 
 #ifdef CAM_TEST_FAILURE
 	SYSCTL_ADD_PROC(&softc->sysctl_ctx, SYSCTL_CHILDREN(softc->sysctl_tree),
@@ -2667,7 +2680,7 @@ daflagssysctl(SYSCTL_HANDLER_ARGS)
 	if (softc->flags != 0)
 		sbuf_printf(&sbuf, "0x%b", (unsigned)softc->flags, DA_FLAG_STRING);
 	else
-		sbuf_printf(&sbuf, "0");
+		sbuf_putc(&sbuf, '0');
 	error = sbuf_finish(&sbuf);
 	sbuf_delete(&sbuf);
 
@@ -2737,7 +2750,6 @@ dazonemodesysctl(SYSCTL_HANDLER_ARGS)
 static int
 dazonesupsysctl(SYSCTL_HANDLER_ARGS)
 {
-	char tmpbuf[180];
 	struct da_softc *softc;
 	struct sbuf sb;
 	int error, first;
@@ -2745,15 +2757,14 @@ dazonesupsysctl(SYSCTL_HANDLER_ARGS)
 
 	softc = (struct da_softc *)arg1;
 
-	error = 0;
 	first = 1;
-	sbuf_new(&sb, tmpbuf, sizeof(tmpbuf), 0);
+	sbuf_new_for_sysctl(&sb, NULL, 0, req);
 
 	for (i = 0; i < sizeof(da_zone_desc_table) /
 	     sizeof(da_zone_desc_table[0]); i++) {
 		if (softc->zone_flags & da_zone_desc_table[i].value) {
 			if (first == 0)
-				sbuf_printf(&sb, ", ");
+				sbuf_cat(&sb, ", ");
 			else
 				first = 0;
 			sbuf_cat(&sb, da_zone_desc_table[i].desc);
@@ -2761,12 +2772,10 @@ dazonesupsysctl(SYSCTL_HANDLER_ARGS)
 	}
 
 	if (first == 1)
-		sbuf_printf(&sb, "None");
+		sbuf_cat(&sb, "None");
 
-	sbuf_finish(&sb);
-
-	error = sysctl_handle_string(oidp, sbuf_data(&sb), sbuf_len(&sb), req);
-
+	error = sbuf_finish(&sb);
+	sbuf_delete(&sb);
 	return (error);
 }
 

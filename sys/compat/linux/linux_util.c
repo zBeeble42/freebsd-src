@@ -31,11 +31,7 @@
  *	from: svr4_util.c,v 1.5 1995/01/22 23:44:50 christos Exp
  */
 
-#include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
-
 #include <sys/param.h>
-#include <sys/types.h>
 #include <sys/bus.h>
 #include <sys/conf.h>
 #include <sys/fcntl.h>
@@ -83,22 +79,14 @@ int
 linux_pwd_onexec(struct thread *td)
 {
 	struct nameidata nd;
-	struct pwd *pwd;
 	int error;
 
 	NDINIT(&nd, LOOKUP, FOLLOW, UIO_SYSSPACE, linux_emul_path);
 	error = namei(&nd);
 	if (error != 0) {
-		/*
-		 * Do not bother if we are in chroot or jail.
-		 */
-		pwd = pwd_hold(td);
-		if (pwd->pwd_rdir != rootvnode) {
-			pwd_drop(pwd);
-			return (0);
-		}
-		pwd_drop(pwd);
-		return (error);
+		/* Do not prevent execution if altroot is non-existent. */
+		pwd_altroot(td, NULL);
+		return (0);
 	}
 	NDFREE_PNBUF(&nd);
 	pwd_altroot(td, nd.ni_vp);

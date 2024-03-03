@@ -29,8 +29,6 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * $FreeBSD$
  */
 
 #ifndef _LINUXKPI_LINUX_RANDOM_H_
@@ -84,6 +82,15 @@ static inline u_long
 get_random_long(void)
 {
 	u_long val;
+
+	get_random_bytes(&val, sizeof(val));
+	return (val);
+}
+
+static inline uint64_t
+get_random_u64(void)
+{
+	uint64_t val;
 
 	get_random_bytes(&val, sizeof(val));
 	return (val);

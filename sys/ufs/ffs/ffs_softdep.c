@@ -37,13 +37,9 @@
  * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- *	from: @(#)ffs_softdep.c	9.59 (McKusick) 6/21/00
  */
 
 #include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
-
 #include "opt_ffs.h"
 #include "opt_quota.h"
 #include "opt_ddb.h"
@@ -10050,7 +10046,7 @@ handle_workitem_remove(struct dirrem *dirrem, int flags)
 		KASSERT(ip->i_nlink >= 0, ("handle_workitem_remove: file ino "
 		    "%ju negative i_nlink %d", (intmax_t)ip->i_number,
 		    ip->i_nlink));
-		DIP_SET(ip, i_nlink, ip->i_nlink);
+		DIP_SET_NLINK(ip, ip->i_nlink);
 		UFS_INODE_SET_FLAG(ip, IN_CHANGE);
 		if (ip->i_nlink < ip->i_effnlink)
 			panic("handle_workitem_remove: bad file delta");
@@ -10073,7 +10069,7 @@ handle_workitem_remove(struct dirrem *dirrem, int flags)
 	ip->i_nlink -= 2;
 	KASSERT(ip->i_nlink >= 0, ("handle_workitem_remove: directory ino "
 	    "%ju negative i_nlink %d", (intmax_t)ip->i_number, ip->i_nlink));
-	DIP_SET(ip, i_nlink, ip->i_nlink);
+	DIP_SET_NLINK(ip, ip->i_nlink);
 	UFS_INODE_SET_FLAG(ip, IN_CHANGE);
 	if (ip->i_nlink < ip->i_effnlink)
 		panic("handle_workitem_remove: bad dir delta");

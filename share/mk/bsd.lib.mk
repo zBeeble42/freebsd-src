@@ -1,6 +1,3 @@
-#	from: @(#)bsd.lib.mk	5.26 (Berkeley) 5/2/91
-# $FreeBSD$
-#
 
 .include <bsd.init.mk>
 .include <bsd.compiler.mk>
@@ -102,23 +99,16 @@ LDFLAGS+= -Wl,-zretpolineplt
 LDFLAGS.bfd+= -Wl,-znoexecstack
 
 # Initialize stack variables on function entry
-.if ${MK_INIT_ALL_ZERO} == "yes"
+.if ${OPT_INIT_ALL} != "none"
 .if ${COMPILER_FEATURES:Minit-all}
-CFLAGS+= -ftrivial-auto-var-init=zero
-CXXFLAGS+= -ftrivial-auto-var-init=zero
-.if ${COMPILER_TYPE} == "clang" && ${COMPILER_VERSION} < 160000
+CFLAGS+= -ftrivial-auto-var-init=${OPT_INIT_ALL}
+CXXFLAGS+= -ftrivial-auto-var-init=${OPT_INIT_ALL}
+.if ${OPT_INIT_ALL} == "zero" && ${COMPILER_TYPE} == "clang" && ${COMPILER_VERSION} < 160000
 CFLAGS+= -enable-trivial-auto-var-init-zero-knowing-it-will-be-removed-from-clang
 CXXFLAGS+= -enable-trivial-auto-var-init-zero-knowing-it-will-be-removed-from-clang
 .endif
 .else
-.warning InitAll (zeros) requested but not supported by compiler
-.endif
-.elif ${MK_INIT_ALL_PATTERN} == "yes"
-.if ${COMPILER_FEATURES:Minit-all}
-CFLAGS+= -ftrivial-auto-var-init=pattern
-CXXFLAGS+= -ftrivial-auto-var-init=pattern
-.else
-.warning InitAll (pattern) requested but not supported by compiler
+.warning INIT_ALL (${OPT_INIT_ALL}) requested but not supported by compiler
 .endif
 .endif
 
@@ -270,10 +260,12 @@ SHLIB_NAME_FULL=${SHLIB_NAME}
 ${SHLIB_NAME_FULL}:	${VERSION_MAP}
 LDFLAGS+=	-Wl,--version-script=${VERSION_MAP}
 
-# lld >= 16 turned on --no-undefined-version by default, but we have several
-# symbols in our version maps that may or may not exist, depending on
-# compile-time defines.
-.if ${LINKER_TYPE} == "lld" && ${LINKER_VERSION} >= 160000
+# Ideally we'd always enable --no-undefined-version (default for lld >= 16),
+# but we have several symbols in our version maps that may or may not exist,
+# depending on compile-time defines and that needs to be handled first.
+.if ${MK_UNDEFINED_VERSION} == "no"
+LDFLAGS+=	-Wl,--no-undefined-version
+.else
 LDFLAGS+=	-Wl,--undefined-version
 .endif
 .endif
@@ -569,6 +561,7 @@ LINKGRP?=	${LIBGRP}
 LINKMODE?=	${LIBMODE}
 SYMLINKOWN?=	${LIBOWN}
 SYMLINKGRP?=	${LIBGRP}
+LINKTAGS=	dev
 .include <bsd.links.mk>
 
 .if ${MK_MAN} != "no" && !defined(LIBRARIES_ONLY)

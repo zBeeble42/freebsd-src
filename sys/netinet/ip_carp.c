@@ -28,11 +28,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "opt_netlink.h"
-
 #include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
-
 #include "opt_bpf.h"
 #include "opt_inet.h"
 #include "opt_inet6.h"
@@ -241,7 +237,7 @@ static int carp_demote_adj_sysctl(SYSCTL_HANDLER_ARGS);
 SYSCTL_NODE(_net_inet, IPPROTO_CARP, carp, CTLFLAG_RW | CTLFLAG_MPSAFE, 0,
     "CARP");
 SYSCTL_PROC(_net_inet_carp, OID_AUTO, allow,
-    CTLFLAG_VNET | CTLTYPE_INT | CTLFLAG_RWTUN | CTLFLAG_MPSAFE,
+    CTLFLAG_VNET | CTLTYPE_INT | CTLFLAG_RWTUN | CTLFLAG_NOFETCH | CTLFLAG_MPSAFE,
     &VNET_NAME(carp_allow), 0, carp_allow_sysctl, "I",
     "Accept incoming CARP packets");
 SYSCTL_PROC(_net_inet_carp, OID_AUTO, dscp,
@@ -889,7 +885,7 @@ carp_send_ad_error(struct carp_softc *sc, int error)
 {
 
 	/*
-	 * We track errors and successfull sends with this logic:
+	 * We track errors and successful sends with this logic:
 	 * - Any error resets success counter to 0.
 	 * - MAX_ERRORS triggers demotion.
 	 * - MIN_SUCCESS successes resets error counter to 0.

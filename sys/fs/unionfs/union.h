@@ -33,9 +33,6 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- *	@(#)union.h	8.9 (Berkeley) 12/10/94
- * $FreeBSD$
  */
 
 #ifdef _KERNEL
@@ -54,6 +51,8 @@ typedef enum _unionfs_whitemode {
 } unionfs_whitemode;
 
 struct unionfs_mount {
+	struct mount   *um_lowermp;     /* MNT_REFed lower mount object */
+	struct mount   *um_uppermp;     /* MNT_REFed upper mount object */
 	struct vnode   *um_lowervp;	/* VREFed once */
 	struct vnode   *um_uppervp;	/* VREFed once */
 	struct vnode   *um_rootvp;	/* ROOT vnode */

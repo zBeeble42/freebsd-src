@@ -1,4 +1,3 @@
-# $FreeBSD$
 
 .include <bsd.init.mk>
 
@@ -65,7 +64,7 @@ CFLAGS+=	-I${LDRSRC}
 FILES=	${BOOT1}.efi
 FILESMODE_${BOOT1}.efi=	${BINMODE}
 
-LDSCRIPT=	${EFISRC}/loader/arch/${MACHINE}/ldscript.${MACHINE}
+LDSCRIPT=	${EFISRC}/loader/arch/${MACHINE}/${MACHINE}.ldscript
 LDFLAGS+=	-Wl,-T${LDSCRIPT},-Bsymbolic,-znotext -pie
 .if ${LINKER_TYPE} == "bfd" && ${LINKER_VERSION} >= 23400
 LDFLAGS+=	-Wl,--no-dynamic-linker

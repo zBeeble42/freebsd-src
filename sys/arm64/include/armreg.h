@@ -25,8 +25,6 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $FreeBSD$
  */
 
 #ifdef __arm__
@@ -191,6 +189,14 @@
 #define	CTR_ILINE_MASK		(0xf << CTR_ILINE_SHIFT)
 #define	CTR_ILINE_VAL(reg)	((reg) & CTR_ILINE_MASK)
 #define	CTR_ILINE_SIZE(reg)	(4 << (CTR_ILINE_VAL(reg) >> CTR_ILINE_SHIFT))
+
+/* CurrentEL - Current Exception Level */
+#define	CURRENTEL_EL_SHIFT	2
+#define	CURRENTEL_EL_MASK	(0x3 << CURRENTEL_EL_SHIFT)
+#define	 CURRENTEL_EL_EL0	(0x0 << CURRENTEL_EL_SHIFT)
+#define	 CURRENTEL_EL_EL1	(0x1 << CURRENTEL_EL_SHIFT)
+#define	 CURRENTEL_EL_EL2	(0x2 << CURRENTEL_EL_SHIFT)
+#define	 CURRENTEL_EL_EL3	(0x3 << CURRENTEL_EL_SHIFT)
 
 /* DAIFSet/DAIFClear */
 #define	DAIF_D			(1 << 3)
@@ -359,6 +365,12 @@
 #define	 ISS_MSR_REG_MASK	\
     (ISS_MSR_OP0_MASK | ISS_MSR_OP2_MASK | ISS_MSR_OP1_MASK | 	\
      ISS_MSR_CRn_MASK | ISS_MSR_CRm_MASK)
+#define	 ISS_MSR_REG(reg)				\
+    (((reg ## _op0) << ISS_MSR_OP0_SHIFT) |		\
+     ((reg ## _op1) << ISS_MSR_OP1_SHIFT) |		\
+     ((reg ## _CRn) << ISS_MSR_CRn_SHIFT) |		\
+     ((reg ## _CRm) << ISS_MSR_CRm_SHIFT) |		\
+     ((reg ## _op2) << ISS_MSR_OP2_SHIFT))
 
 #define	 ISS_DATA_ISV_SHIFT	24
 #define	 ISS_DATA_ISV		(0x01 << ISS_DATA_ISV_SHIFT)
@@ -410,6 +422,7 @@
 #define	 EXCP_UNKNOWN		0x00	/* Unkwn exception */
 #define	 EXCP_TRAP_WFI_WFE	0x01	/* Trapped WFI or WFE */
 #define	 EXCP_FP_SIMD		0x07	/* VFP/SIMD trap */
+#define	 EXCP_BTI		0x0d	/* Branch Target Exception */
 #define	 EXCP_ILL_STATE		0x0e	/* Illegal execution state */
 #define	 EXCP_SVC32		0x11	/* SVC trap for AArch32 */
 #define	 EXCP_SVC64		0x15	/* SVC trap for AArch64 */
@@ -1982,6 +1995,15 @@
 #define	PMXEVTYPER_EL0_CRm		13
 #define	PMXEVTYPER_EL0_op2		1
 
+/* RNDRRS */
+#define	RNDRRS				MRS_REG(RNDRRS)
+#define	RNDRRS_REG			MRS_REG_ALT_NAME(RNDRRS)
+#define	RNDRRS_op0			3
+#define	RNDRRS_op1			3
+#define	RNDRRS_CRn			2
+#define	RNDRRS_CRm			4
+#define	RNDRRS_op2			1
+
 /* SCTLR_EL1 - System Control Register */
 #define	SCTLR_RES1	0x30d00800	/* Reserved ARMv8.0, write 1 */
 #define	SCTLR_M				(UL(0x1) << 0)
@@ -2061,8 +2083,15 @@
 #define	PSR_DAIF	(PSR_D | PSR_A | PSR_I | PSR_F)
 /* The default DAIF mask. These bits are valid in spsr_el1 and daif */
 #define	PSR_DAIF_DEFAULT (PSR_F)
+#define	PSR_BTYPE	0x00000c00UL
+#define	PSR_SSBS	0x00001000UL
+#define	PSR_ALLINT	0x00002000UL
 #define	PSR_IL		0x00100000UL
 #define	PSR_SS		0x00200000UL
+#define	PSR_PAN		0x00400000UL
+#define	PSR_UAO		0x00800000UL
+#define	PSR_DIT		0x01000000UL
+#define	PSR_TCO		0x02000000UL
 #define	PSR_V		0x10000000UL
 #define	PSR_C		0x20000000UL
 #define	PSR_Z		0x40000000UL
@@ -2129,7 +2158,7 @@
 #define	TCR_TBI1_SHIFT		38
 #define	TCR_TBI1		(1UL << TCR_TBI1_SHIFT)
 #define	TCR_TBI0_SHIFT		37
-#define	TCR_TBI0		(1U << TCR_TBI0_SHIFT)
+#define	TCR_TBI0		(1UL << TCR_TBI0_SHIFT)
 #define	TCR_ASID_SHIFT		36
 #define	TCR_ASID_WIDTH		1
 #define	TCR_ASID_16		(1UL << TCR_ASID_SHIFT)
@@ -2143,6 +2172,7 @@
 #define	TCR_IPS_44BIT		(4UL << TCR_IPS_SHIFT)
 #define	TCR_IPS_48BIT		(5UL << TCR_IPS_SHIFT)
 #define	TCR_TG1_SHIFT		30
+#define	TCR_TG1_MASK		(3UL << TCR_TG1_SHIFT)
 #define	TCR_TG1_16K		(1UL << TCR_TG1_SHIFT)
 #define	TCR_TG1_4K		(2UL << TCR_TG1_SHIFT)
 #define	TCR_TG1_64K		(3UL << TCR_TG1_SHIFT)
@@ -2157,8 +2187,10 @@
 #define	TCR_A1_SHIFT		22
 #define	TCR_A1			(0x1UL << TCR_A1_SHIFT)
 #define	TCR_T1SZ_SHIFT		16
+#define	TCR_T1SZ_MASK		(0x3fUL << TCR_T1SZ_SHIFT)
 #define	TCR_T1SZ(x)		((x) << TCR_T1SZ_SHIFT)
 #define	TCR_TG0_SHIFT		14
+#define	TCR_TG0_MASK		(3UL << TCR_TG0_SHIFT)
 #define	TCR_TG0_4K		(0UL << TCR_TG0_SHIFT)
 #define	TCR_TG0_64K		(1UL << TCR_TG0_SHIFT)
 #define	TCR_TG0_16K		(2UL << TCR_TG0_SHIFT)
@@ -2169,10 +2201,10 @@
 #define	TCR_IRGN0_SHIFT		8
 #define	TCR_IRGN0_WBWA		(1UL << TCR_IRGN0_SHIFT)
 #define	TCR_EPD0_SHIFT		7
-#define	TCR_EPD0		(1UL << TCR_EPD1_SHIFT)
+#define	TCR_EPD0		(1UL << TCR_EPD0_SHIFT)
 /* Bit 6 is reserved */
 #define	TCR_T0SZ_SHIFT		0
-#define	TCR_T0SZ_MASK		0x3f
+#define	TCR_T0SZ_MASK		(0x3fUL << TCR_T0SZ_SHIFT)
 #define	TCR_T0SZ(x)		((x) << TCR_T0SZ_SHIFT)
 #define	TCR_TxSZ(x)		(TCR_T1SZ(x) | TCR_T0SZ(x))
 
